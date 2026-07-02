@@ -11,84 +11,84 @@ import torch.distributed as dist
 import torch.multiprocessing as mp
 from edtrace import text, image, link
 from gpu_util import cuda_if_available
-from lecture_util import article_link
+from lecture_util import article_link, bilingual_text, bilingual_verbatim
 
 if not torch.cuda.is_available():
     torch.cuda.synchronize = lambda: None  # No-op if CUDA is not available
 
 def main():
-    text("# Lecture 7: parallelism")
-    text("Last week: parallelism within a single GPU")
-    text("This week: parallelism across multiple GPUs")
+    bilingual_text("# Lecture 7: parallelism", '# 第 7 讲：并行')
+    bilingual_text("Last week: parallelism within a single GPU", '上周：单个 GPU 内部的并行。')
+    bilingual_text("This week: parallelism across multiple GPUs", '本周：跨多个 GPU 的并行。')
     image("images/gpu-node-overview.png", width=700)
 
-    text("In both cases, **compute** (arithmetic logic units) is far from inputs/outputs (**data**).")
-    text("Unifying theme: orchestrate computation to avoid data transfer bottlenecks")
+    bilingual_text("In both cases, **compute** (arithmetic logic units) is far from inputs/outputs (**data**).", '在这两种情况下，**计算**（算术逻辑单元）都离输入/输出（**数据**）很远。')
+    bilingual_text("Unifying theme: orchestrate computation to avoid data transfer bottlenecks", '统一主题：组织计算，以避免数据传输瓶颈。')
 
-    text("Generalized hierarchy:")
-    text("- Single node, single GPU: L1 cache / shared memory (fastest)")
-    text("- Single node, single GPU: HBM")
-    text("- Single node, multi-GPU: NVLink/NVSwitch")
-    text("- Multi-node, multi-GPU: Infiniband/Ethernet (slowest)")
+    bilingual_text("Generalized hierarchy:", '广义层次结构：')
+    bilingual_text("- Single node, single GPU: L1 cache / shared memory (fastest)", '- 单节点、单 GPU：L1 缓存 / 共享内存（最快）。')
+    bilingual_text("- Single node, single GPU: HBM", '- 单节点、单 GPU：HBM。')
+    bilingual_text("- Single node, multi-GPU: NVLink/NVSwitch", '- 单节点、多 GPU：NVLink/NVSwitch。')
+    bilingual_text("- Multi-node, multi-GPU: Infiniband/Ethernet (slowest)", '- 多节点、多 GPU：Infiniband/Ethernet（最慢）。')
 
-    text("Last week: reduce memory accesses via fusion/tiling")
-    text("This week: reduce communication across GPUs/nodes via replication/sharding")
+    bilingual_text("Last week: reduce memory accesses via fusion/tiling", '上周：通过融合/分块减少内存访问。')
+    bilingual_text("This week: reduce communication across GPUs/nodes via replication/sharding", '本周：通过复制/分片减少 GPU/节点之间的通信。')
 
-    text("Why do multi-GPU?")
-    text("1. Your parameters (optimizer state + gradients + activations) don't fit on a single GPU.")
-    text("2. You want to use more GPUs (more FLOPs) to train faster.")
+    bilingual_text("Why do multi-GPU?", '为什么要使用多 GPU？')
+    bilingual_text("1. Your parameters (optimizer state + gradients + activations) don't fit on a single GPU.", '1. 你的参数（优化器状态 + 梯度 + 激活值）放不进单个 GPU。')
+    bilingual_text("2. You want to use more GPUs (more FLOPs) to train faster.", '2. 你想使用更多 GPU（更多 FLOPs）来更快训练。')
 
     # When you execute this lecture directly (python lecture_07.py), it uses multiprocessing, which produces output from each process (below).
     # However, when you trace this lecture (python -m edtrace.execute -m lecture_07), we turn off multiprocessing.
     link(title="stdout for this lecture", url="var/traces/lecture_07_stdout.txt")
 
-    text("### Part 1: building blocks of distributed communication/computation")
+    bilingual_text("### Part 1: building blocks of distributed communication/computation", '### 第 1 部分：分布式通信/计算的构建块')
     collective_operations()    # Programming model
     hardware()                 # Hardware: how GPUs are connected
     torch_distributed()        # How this is implemented in NCCL/PyTorch
     benchmarking()             # Measure actual NCCL bandwidth
 
-    text("### Part 2: distributed training")
-    text("Walk through bare-bones implementations of each strategy on deep MLPs.")
-    text("Recall that MLPs are the compute bottleneck in Transformers, so this is representative.")
+    bilingual_text("### Part 2: distributed training", '### 第 2 部分：分布式训练')
+    bilingual_text("Walk through bare-bones implementations of each strategy on deep MLPs.", '在深层 MLP 上逐步讲解每种策略的最小实现。')
+    bilingual_text("Recall that MLPs are the compute bottleneck in Transformers, so this is representative.", '回忆一下，MLP 是 Transformer 中的计算瓶颈，因此这个例子具有代表性。')
 
     data_parallelism()         # Cut up along the batch dimension
     tensor_parallelism()       # Cut up along the width dimension
     pipeline_parallelism()     # Cut up along the depth dimension
 
-    text("What's missing?")
-    text("- Communication/computation overlap")
-    text("- More general models (with attention, etc.)")
-    text("- Other forms of parallelism (e.g., sequence parallelism, expert parallelism, combinations)")
-    text("- Jax/TPUs: just define the model, the sharding strategy, and the Jax compiler handles the rest "), link(title="levanter", url="https://crfm.stanford.edu/2023/06/16/levanter-1_0-release.html")
-    text("- But we're doing PyTorch so you can see how one builds up from the primitives")
+    bilingual_text("What's missing?", '还缺什么？')
+    bilingual_text("- Communication/computation overlap", '- 通信与计算重叠。')
+    bilingual_text("- More general models (with attention, etc.)", '- 更通用的模型（带注意力等）。')
+    bilingual_text("- Other forms of parallelism (e.g., sequence parallelism, expert parallelism, combinations)", '- 其他形式的并行（例如序列并行、专家并行以及组合）。')
+    bilingual_text("- Jax/TPUs: just define the model, the sharding strategy, and the Jax compiler handles the rest ", '- Jax/TPU：只需定义模型和分片策略，其余由 Jax 编译器处理。'), link(title="levanter", url="https://crfm.stanford.edu/2023/06/16/levanter-1_0-release.html")
+    bilingual_text("- But we're doing PyTorch so you can see how one builds up from the primitives", '- 但我们使用 PyTorch，这样你可以看到如何从原语逐步搭建。')
 
-    text("### Summary")
-    text("- Many ways to parallelize: data (batch), tensor/expert (width), pipeline (depth), sequence (length)")
-    text("- Data parallelism: DDP (all-reduce), FSDP/ZeRO (all-gather + reduce-scatter)")
-    text("- Tensor parallelism: requires very fast interconnects (e.g., NVLink)")
-    text("- Pipeline parallelism: can work with slow interconnects, but need to work to reduce pipeline bubbles")
-    text("- Can **re-compute** or store in **memory** or store in another GPUs memory and **communicate**")
-    text("- Hardware is getting faster, but will always want bigger models, so will have this hierarchical structure")
+    bilingual_text("### Summary", '### 总结')
+    bilingual_text("- Many ways to parallelize: data (batch), tensor/expert (width), pipeline (depth), sequence (length)", '- 并行方式很多：数据（批次）、张量/专家（宽度）、流水线（深度）、序列（长度）。')
+    bilingual_text("- Data parallelism: DDP (all-reduce), FSDP/ZeRO (all-gather + reduce-scatter)", '- 数据并行：DDP（all-reduce）、FSDP/ZeRO（all-gather + reduce-scatter）。')
+    bilingual_text("- Tensor parallelism: requires very fast interconnects (e.g., NVLink)", '- 张量并行：需要非常快的互连（例如 NVLink）。')
+    bilingual_text("- Pipeline parallelism: can work with slow interconnects, but need to work to reduce pipeline bubbles", '- 流水线并行：可在较慢互连上工作，但需要努力减少流水线气泡。')
+    bilingual_text("- Can **re-compute** or store in **memory** or store in another GPUs memory and **communicate**", '- 可以**重算**，也可以存入**内存**，或者存入另一块 GPU 的内存并进行**通信**。')
+    bilingual_text("- Hardware is getting faster, but will always want bigger models, so will have this hierarchical structure", '- 硬件会越来越快，但我们总想要更大的模型，因此这种层次结构会一直存在。')
 
 
 def collective_operations():
-    text("**Collective operations** are the conceptual primitives used for distributed programming "), article_link("https://en.wikipedia.org/wiki/Collective_operation")
-    text("- These are classic in the parallel programming literature from the 1980s.")
-    text("- *Collective* means that you specify a general communication pattern across many devices.")
-    text("- This can be better/faster than managing point-to-point communication yourself.")
+    bilingual_text("**Collective operations** are the conceptual primitives used for distributed programming ", '**集合通信操作**是分布式编程使用的概念原语。'), article_link("https://en.wikipedia.org/wiki/Collective_operation")
+    bilingual_text("- These are classic in the parallel programming literature from the 1980s.", '- 这些是 1980 年代并行编程文献中的经典概念。')
+    bilingual_text("- *Collective* means that you specify a general communication pattern across many devices.", '- *集合通信*意味着你指定跨多个设备的一般通信模式。')
+    bilingual_text("- This can be better/faster than managing point-to-point communication yourself.", '- 这可能比自己管理点对点通信更好、更快。')
 
-    text("**Setup**:")
+    bilingual_text("**Setup**:", '**设置**：')
     image("images/ranks.png", width=500)
-    text("- **Rank**: a particular device/GPU (e.g., 0, 1, 2, 3)")
-    text("- **World size**: total number of devices (e.g., 4)")
+    bilingual_text("- **Rank**: a particular device/GPU (e.g., 0, 1, 2, 3)", '- **Rank**：某个具体设备/GPU（例如 0、1、2、3）。')
+    bilingual_text("- **World size**: total number of devices (e.g., 4)", '- **World size**：设备总数（例如 4）。')
 
-    text("Operations:")
-    text("- Broadcast, scatter, gather, reduce (foundations)")
-    text("- All-gather, reduce-scatter, all-reduce (workhorse)")
-    text("- All-to-all (for MoEs)")
+    bilingual_text("Operations:", '操作：')
+    bilingual_text("- Broadcast, scatter, gather, reduce (foundations)", '- broadcast、scatter、gather、reduce（基础）。')
+    bilingual_text("- All-gather, reduce-scatter, all-reduce (workhorse)", '- all-gather、reduce-scatter、all-reduce（主力）。')
+    bilingual_text("- All-to-all (for MoEs)", '- all-to-all（用于 MoE）。')
 
-    text("**Broadcast**: copy from rank 0 to all ranks")
+    bilingual_text("**Broadcast**: copy from rank 0 to all ranks", '**Broadcast**：从 rank 0 复制到所有 rank。')
     # Input
     rank0 = tensor([0., 1, 2, 3])
 
@@ -98,9 +98,9 @@ def collective_operations():
     rank2 = tensor([0., 1, 2, 3])
     rank3 = tensor([0., 1, 2, 3])
 
-    text("Minor use case: rank 0 loads initial checkpoint and broadcasts to all ranks")
+    bilingual_text("Minor use case: rank 0 loads initial checkpoint and broadcasts to all ranks", '小用例：rank 0 加载初始 checkpoint，并广播到所有 rank。')
 
-    text("**Scatter** tensor on rank 0 to all ranks")
+    bilingual_text("**Scatter** tensor on rank 0 to all ranks", '**Scatter**：把 rank 0 上的张量分发到所有 rank。')
     # Input
     rank0 = tensor([0., 1, 2, 3])
 
@@ -110,9 +110,9 @@ def collective_operations():
     rank2 = tensor([2.])
     rank3 = tensor([3.])
 
-    text("Note: stepping stone to understanding reduce-scatter")
+    bilingual_text("Note: stepping stone to understanding reduce-scatter", '注意：这是理解 reduce-scatter 的垫脚石。')
 
-    text("**Gather** pieces from all ranks to rank 0 (opposite of scatter)")
+    bilingual_text("**Gather** pieces from all ranks to rank 0 (opposite of scatter)", '**Gather**：把所有 rank 的片段收集到 rank 0（scatter 的反向操作）。')
     # Input
     rank0 = tensor([0.])
     rank1 = tensor([1.])
@@ -122,9 +122,9 @@ def collective_operations():
     # Output
     rank0 = tensor([0., 1, 2, 3])
 
-    text("Note: stepping stone to understanding all-gather")
+    bilingual_text("Note: stepping stone to understanding all-gather", '注意：这是理解 all-gather 的垫脚石。')
 
-    text("**Reduce** pieces from all ranks to rank 0, applying some operation (e.g., sum, min, max)")
+    bilingual_text("**Reduce** pieces from all ranks to rank 0, applying some operation (e.g., sum, min, max)", '**Reduce**：把所有 rank 的片段聚合到 rank 0，并应用某个操作（例如 sum、min、max）。')
     # Input
     rank0 = tensor([0.])
     rank1 = tensor([1.])
@@ -134,9 +134,9 @@ def collective_operations():
     # Output
     rank0 = tensor([6.])  # Sum of all ranks (0 + 1 + 2 + 3)
 
-    text("Note: stepping stone to understanding all-reduce")
+    bilingual_text("Note: stepping stone to understanding all-reduce", '注意：这是理解 all-reduce 的垫脚石。')
 
-    text("**All-gather**: perform gather to all ranks, not just rank 0")
+    bilingual_text("**All-gather**: perform gather to all ranks, not just rank 0", '**All-gather**：对所有 rank 执行 gather，而不仅是 rank 0。')
     # Input
     rank0 = tensor([0.])
     rank1 = tensor([1.])
@@ -149,9 +149,9 @@ def collective_operations():
     rank2 = tensor([0., 1, 2, 3])
     rank3 = tensor([0., 1, 2, 3])
 
-    text("Use case: each rank holds parameter shard, gather to get full parameters for forward pass")
+    bilingual_text("Use case: each rank holds parameter shard, gather to get full parameters for forward pass", '用例：每个 rank 持有参数分片，前向传播时 gather 得到完整参数。')
 
-    text("**Reduce-scatter**: perform reduce on each dimension, scatter results")
+    bilingual_text("**Reduce-scatter**: perform reduce on each dimension, scatter results", '**Reduce-scatter**：在每个维度上执行 reduce，再把结果 scatter。')
     # Input
     rank0 = tensor([0., 1, 2, 3])
     rank1 = tensor([1., 2, 3, 4])
@@ -164,9 +164,9 @@ def collective_operations():
     rank2 = tensor([14.]) # Sum along dim 2 (2 + 3 + 4 + 5)
     rank3 = tensor([18.]) # Sum along dim 3 (3 + 4 + 5 + 6)
 
-    text("Use case: after backward pass, sum gradients from different data shards, but distribute storage")
+    bilingual_text("Use case: after backward pass, sum gradients from different data shards, but distribute storage", '用例：反向传播后，对不同数据分片上的梯度求和，但分布式存储结果。')
 
-    text("**All-reduce** = reduce-scatter + all-gather")
+    bilingual_text("**All-reduce** = reduce-scatter + all-gather", '**All-reduce（全规约）** = reduce-scatter + all-gather。')
     # Input
     rank0 = tensor([0., 1, 2, 3])
     rank1 = tensor([1., 2, 3, 4])
@@ -179,10 +179,10 @@ def collective_operations():
     rank2 = tensor([6., 10, 14, 18])
     rank3 = tensor([6., 10, 14, 18])
 
-    text("Use case: after backward pass, sum gradients from different data shards, but replicate full parameters")
-    text("Breaking all-reduce into reduce-scatter + all-gather allows for flexibility (e.g., ZeRO/FSDP)")
+    bilingual_text("Use case: after backward pass, sum gradients from different data shards, but replicate full parameters", '用例：反向传播后，对不同数据分片上的梯度求和，但复制完整参数。')
+    bilingual_text("Breaking all-reduce into reduce-scatter + all-gather allows for flexibility (e.g., ZeRO/FSDP)", '把 all-reduce 拆成 reduce-scatter + all-gather 可以带来灵活性（例如 ZeRO/FSDP）。')
 
-    text("**All-to-all**: each rank sends each other rank some tensor (most general)")
+    bilingual_text("**All-to-all**: each rank sends each other rank some tensor (most general)", '**All-to-all**：每个 rank 都向其他每个 rank 发送一些张量（最一般的形式）。')
     # Input
     rank0 = tensor([0., 1, 2, 3])      # send  0 to rank 0,  1 to rank 1,  2 to rank 2,  3 to rank 3
     rank1 = tensor([4., 5, 6, 7])      # send  4 to rank 0,  5 to rank 1,  6 to rank 2,  7 to rank 3
@@ -195,54 +195,54 @@ def collective_operations():
     rank2 = tensor([2, 6, 10, 14])
     rank3 = tensor([3, 7, 11, 15])
 
-    text("Notes:")
-    text("- Useful for MoEs: each rank has split of data and subset of experts; need to route data to experts")
-    text("- For balanced splits, all-to-all looks like transpose")
-    text("- Also handles unbalanced splits (but want splits to be as balanced as possible)")
+    bilingual_text("Notes:", '说明：')
+    bilingual_text("- Useful for MoEs: each rank has split of data and subset of experts; need to route data to experts", '- 对 MoE 很有用：每个 rank 拥有一部分数据和一部分专家，需要把数据路由到专家。')
+    bilingual_text("- For balanced splits, all-to-all looks like transpose", '- 对均衡切分来说，all-to-all 看起来像转置。')
+    bilingual_text("- Also handles unbalanced splits (but want splits to be as balanced as possible)", '- 也能处理不均衡切分（但我们希望切分尽可能均衡）。')
 
-    text("Way to remember the terminology:")
-    text("- Reduce: performs some associative/commutative operation (sum, min, max)")
-    text("- Scatter is inverse of gather")
-    text("- All: means destination is all devices")
+    bilingual_text("Way to remember the terminology:", '记住这些术语的方法：')
+    bilingual_text("- Reduce: performs some associative/commutative operation (sum, min, max)", '- Reduce：执行某种满足结合律/交换律的操作（sum、min、max）。')
+    bilingual_text("- Scatter is inverse of gather", '- Scatter 是 gather 的反向操作。')
+    bilingual_text("- All: means destination is all devices", '- All：表示目标是所有设备。')
 
 
 def hardware():
-    text("Classic (in the home):")
+    bilingual_text("Classic (in the home):", '经典情况（家用环境）：')
     image("https://media.springernature.com/lw685/springer-static/image/art%3A10.1186%2Fs42774-021-00098-3/MediaObjects/42774_2021_98_Fig1_HTML.png?as=webp", width=500)
-    text("- GPUs on same node communicate via a PCI(e) bus (v7.0, 16 lanes => 242 GB/s) "), article_link("https://en.wikipedia.org/wiki/PCI_Express")
-    text("- GPUs on different nodes communicate via Ethernet (~200 MB/s)")
+    bilingual_text("- GPUs on same node communicate via a PCI(e) bus (v7.0, 16 lanes => 242 GB/s) ", '- 同一节点上的 GPU 通过 PCI(e) 总线通信（v7.0，16 lanes => 242 GB/s）。'), article_link("https://en.wikipedia.org/wiki/PCI_Express")
+    bilingual_text("- GPUs on different nodes communicate via Ethernet (~200 MB/s)", '- 不同节点上的 GPU 通过 Ethernet 通信（约 200 MB/s）。')
     
-    text("Modern (in the data center):")
+    bilingual_text("Modern (in the data center):", '现代情况（数据中心）：')
     image("images/gpu-node-overview.png", width=700)
 
-    text("Typical setup:")
-    text("- 8 GPUs per node, connected by NVLink to an NVSwitch (B200s' NVLink 5.0 gets 1.8 TB/s; HBM was 8 TB/s)")
-    text("- 256 nodes per pod, connected by Infiniband (via PCIe -> HCA / Infiniband NIC -> Infiniband cable) (~0.05 TB/s)")
-    text("- N pods per cluster / datacenter, connected by Ethernet (via PCIe -> CPU)")
+    bilingual_text("Typical setup:", '典型配置：')
+    bilingual_text("- 8 GPUs per node, connected by NVLink to an NVSwitch (B200s' NVLink 5.0 gets 1.8 TB/s; HBM was 8 TB/s)", '- 每个节点 8 块 GPU，通过 NVLink 连接到 NVSwitch（B200 的 NVLink 5.0 达到 1.8 TB/s；HBM 是 8 TB/s）。')
+    bilingual_text("- 256 nodes per pod, connected by Infiniband (via PCIe -> HCA / Infiniband NIC -> Infiniband cable) (~0.05 TB/s)", '- 每个 pod 256 个节点，通过 Infiniband 连接（PCIe -> HCA / Infiniband NIC -> Infiniband cable）（约 0.05 TB/s）。')
+    bilingual_text("- N pods per cluster / datacenter, connected by Ethernet (via PCIe -> CPU)", '- 每个集群/数据中心有 N 个 pod，通过 Ethernet 连接（经 PCIe -> CPU）。')
 
-    text("Bypassing the CPU:")
-    text("- Ethernet requires passing through the CPU (copying data to kernel socket buffer, build TCP packets, copy to NIC ring buffer)")
-    text("- Remote Direct Memory Access (RDMA): allows one GPU to directly read/write another GPU's memory without involving the CPU")
-    text("- Infiniband supports RDMA, but standard Ethernet does not")
+    bilingual_text("Bypassing the CPU:", '绕过 CPU：')
+    bilingual_text("- Ethernet requires passing through the CPU (copying data to kernel socket buffer, build TCP packets, copy to NIC ring buffer)", '- Ethernet 需要经过 CPU（把数据复制到内核 socket buffer、构造 TCP 包、复制到 NIC ring buffer）。')
+    bilingual_text("- Remote Direct Memory Access (RDMA): allows one GPU to directly read/write another GPU's memory without involving the CPU", '- 远程直接内存访问（RDMA）：允许一个 GPU 不经过 CPU，直接读写另一个 GPU 的内存。')
+    bilingual_text("- Infiniband supports RDMA, but standard Ethernet does not", '- Infiniband 支持 RDMA，但标准 Ethernet 不支持。')
 
-    text("Advancements:")
-    text("- GB200/GB300 NVL72: 8 GPUs per tray, 9 trays per rack -> 72 GPUs in one NVLink domain")
-    text("- RDMA over Converged Ethernet (RoCE): Ethernet bypasses CPU, similar but cheaper/weaker than Infiniband, used by Meta")
+    bilingual_text("Advancements:", '进展：')
+    bilingual_text("- GB200/GB300 NVL72: 8 GPUs per tray, 9 trays per rack -> 72 GPUs in one NVLink domain", '- GB200/GB300 NVL72：每个 tray 8 块 GPU，每个机架 9 个 tray -> 一个 NVLink domain 中有 72 块 GPU。')
+    bilingual_text("- RDMA over Converged Ethernet (RoCE): Ethernet bypasses CPU, similar but cheaper/weaker than Infiniband, used by Meta", '- RDMA over Converged Ethernet（RoCE）：Ethernet 绕过 CPU，类似 Infiniband 但更便宜也更弱，Meta 使用这种方案。')
 
-    text("### NVIDIA Collective Communication Library (NCCL)")
-    text("NCCL translates collective operations into low-level packets that are sent between GPUs. "), link(title="talk", url="https://www.nvidia.com/en-us/on-demand/session/gtcspring21-s31880/")
-    text("- Detects topology of hardware (e.g., number of nodes, switches, NVLink/PCIe)")
-    text("- Optimizes the path between GPUs")
-    text("- Launches GPU kernels to send/receive data")
+    bilingual_text("### NVIDIA Collective Communication Library (NCCL)", '### NVIDIA 集合通信库（NCCL）')
+    bilingual_text("NCCL translates collective operations into low-level packets that are sent between GPUs. ", 'NCCL 把集合通信操作转换为 GPU 之间发送的低层数据包。'), link(title="talk", url="https://www.nvidia.com/en-us/on-demand/session/gtcspring21-s31880/")
+    bilingual_text("- Detects topology of hardware (e.g., number of nodes, switches, NVLink/PCIe)", '- 检测硬件拓扑（例如节点数量、交换机、NVLink/PCIe）。')
+    bilingual_text("- Optimizes the path between GPUs", '- 优化 GPU 之间的路径。')
+    bilingual_text("- Launches GPU kernels to send/receive data", '- 启动 GPU 内核来发送/接收数据。')
 
 
 def torch_distributed():
-    text("PyTorch distributed library (`torch.distributed`) "), link(title="documentation", url="https://pytorch.org/docs/stable/distributed.html")
-    text("- Provides clean interface for collective operations (e.g., `all_gather_into_tensor`)")
-    text("- Supports multiple backends for different hardware: gloo (CPU), nccl (GPU)")
-    text("- Also supports higher-level algorithms (e.g., `FullyShardedDataParallel`) [not used in this course]")
+    bilingual_text("PyTorch distributed library (`torch.distributed`) ", 'PyTorch 分布式库（`torch.distributed`）。'), link(title="documentation", url="https://pytorch.org/docs/stable/distributed.html")
+    bilingual_text("- Provides clean interface for collective operations (e.g., `all_gather_into_tensor`)", '- 为集合通信操作提供清晰接口（例如 `all_gather_into_tensor`）。')
+    bilingual_text("- Supports multiple backends for different hardware: gloo (CPU), nccl (GPU)", '- 支持面向不同硬件的多个后端：gloo（CPU）、nccl（GPU）。')
+    bilingual_text("- Also supports higher-level algorithms (e.g., `FullyShardedDataParallel`) [not used in this course]", '- 也支持更高层算法（例如 `FullyShardedDataParallel`）[本课程不使用]。')
 
-    text("Let's walk through some examples.")
+    bilingual_text("Let's walk through some examples.", '我们来看几个例子。')
     spawn(collective_operations_main, world_size=4)
 
 
@@ -279,13 +279,13 @@ def collective_operations_main(rank: int, world_size: int):  # @inspect rank wor
     dist.all_gather_into_tensor(output_tensor=output, input_tensor=input, async_op=False)
     print(f"Rank {rank} [after all-gather]: input = {input}, output = {output}", flush=True)
 
-    text("Indeed, all-reduce = reduce-scatter + all-gather!")
+    bilingual_text("Indeed, all-reduce = reduce-scatter + all-gather!", '确实，all-reduce = reduce-scatter + all-gather！')
 
     cleanup()
 
 
 def benchmarking():
-    text("How fast does communication happen?")
+    bilingual_text("How fast does communication happen?", '通信发生得有多快？')
 
     # All-reduce
     spawn(all_reduce, world_size=4, num_elements=100 * 1024**2)
@@ -293,7 +293,7 @@ def benchmarking():
     # Reduce-scatter
     spawn(reduce_scatter, world_size=4, num_elements=100 * 1024**2)
 
-    text("References:")
+    bilingual_text("References:", '参考资料：')
     link(title="How to reason about collective operations", url="https://github.com/NVIDIA/nccl-tests/blob/master/doc/PERFORMANCE.md#allreduce")
     link(title="Sample benchmarking code", url="https://github.com/stas00/ml-engineering/blob/master/network/benchmarks/all_reduce_bench.py")
 
@@ -374,17 +374,17 @@ def reduce_scatter(rank: int, world_size: int, num_elements: int):
 
 def data_parallelism():
     image("images/data-parallelism.png", width=300)
-    text("Sharding strategy: each rank gets a slice of the data")
+    bilingual_text("Sharding strategy: each rank gets a slice of the data", '分片策略：每个 rank 获得数据的一部分。')
 
     data = generate_sample_data()
     spawn(data_parallelism_main, world_size=4, data=data, num_layers=4, num_steps=1)
 
-    text("Notes:")
-    text("- Losses are different across ranks (computed on local data)")
-    text("- Gradients are all-reduced to be the same across ranks")
-    text("- Therefore, parameters remain the same across ranks")
+    bilingual_text("Notes:", '说明：')
+    bilingual_text("- Losses are different across ranks (computed on local data)", '- 各 rank 上的损失不同（在本地数据上计算）。')
+    bilingual_text("- Gradients are all-reduced to be the same across ranks", '- 梯度通过 all-reduce 变得在各 rank 上相同。')
+    bilingual_text("- Therefore, parameters remain the same across ranks", '- 因此，各 rank 上的参数保持相同。')
 
-    text("Next time: FSDP/ZeRO: use all-gather and reduce-scatter to avoid holding all parameters in memory")
+    bilingual_text("Next time: FSDP/ZeRO: use all-gather and reduce-scatter to avoid holding all parameters in memory", '下次：FSDP/ZeRO：使用 all-gather 和 reduce-scatter，避免在内存中保存所有参数。')
 
 
 def generate_sample_data():
@@ -438,7 +438,7 @@ def data_parallelism_main(rank: int, world_size: int, data: tensor, num_layers: 
 
 def tensor_parallelism():
     image("images/tensor-parallelism.png", width=300)
-    text("Sharding strategy: each rank gets part of each layer, transfer all data/activations")
+    bilingual_text("Sharding strategy: each rank gets part of each layer, transfer all data/activations", '分片策略：每个 rank 获得每一层的一部分，并传输所有数据/激活值。')
 
     data = generate_sample_data()
     spawn(tensor_parallelism_main, world_size=4, data=data, num_layers=4)
@@ -483,7 +483,7 @@ def tensor_parallelism_main(rank: int, world_size: int, data: tensor, num_layers
 
 def pipeline_parallelism():
     image("images/pipeline-parallelism.png", width=300)
-    text("Sharding strategy: each rank gets subset of layers, transfer all data/activations")
+    bilingual_text("Sharding strategy: each rank gets subset of layers, transfer all data/activations", '分片策略：每个 rank 获得一部分层，并传输所有数据/激活值。')
 
     data = generate_sample_data()
     spawn(pipeline_parallelism_main, world_size=2, data=data, num_layers=4, num_micro_batches=4)
@@ -529,7 +529,7 @@ def pipeline_parallelism_main(rank: int, world_size: int, data: tensor, num_laye
             print(f"[pipeline_parallelism] Rank {rank}: sending {summarize_tensor(x)} to rank {rank + 1}", flush=True)  # @stepover
             dist.send(tensor=x, dst=rank + 1)
 
-    text("Not handled: overlapping communication/computation to eliminate pipeline bubbles")
+    bilingual_text("Not handled: overlapping communication/computation to eliminate pipeline bubbles", '未处理：通过通信/计算重叠来消除流水线气泡。')
 
     # Backward pass: homework exercise
 
