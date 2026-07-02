@@ -16,6 +16,10 @@ This branch adds a bilingual learning layer on top of the original Stanford CS33
 - 本项目不是 Stanford 官方翻译。
 - PDF lectures and text embedded inside images are not covered in the first executable-lecture translation pass.
 - 第一轮可执行讲义翻译暂不覆盖 PDF 讲义和图片内部文字。
+- Current executable lecture coverage: `lecture_01.py`, `lecture_02.py`, `lecture_06.py`, `lecture_07.py`, `lecture_10.py`, `lecture_12.py`, `lecture_13.py`, `lecture_14.py`, and `lecture_17.py`.
+- 当前可执行讲义覆盖范围：`lecture_01.py`、`lecture_02.py`、`lecture_06.py`、`lecture_07.py`、`lecture_10.py`、`lecture_12.py`、`lecture_13.py`、`lecture_14.py` 和 `lecture_17.py`。
+- Reference notes in `references.py` include Chinese study notes while preserving formal titles, authors, dates, and URLs.
+- `references.py` 中的引用说明已增加中文学习说明；正式标题、作者、日期和 URL 保持原样。
 
 Translation tracking files:
 

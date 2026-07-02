@@ -27,3 +27,12 @@ This glossary keeps terminology consistent across the bilingual learning version
 | data filtering | 数据过滤 | filtering | lecture_13 | 数据处理语境。 |
 | deduplication | 去重 | dedup | lecture_14 | 数据清洗语境。 |
 | multimodality | 多模态 | multimodal | lecture_17 | 模型正式名称不翻译。 |
+| KV cache | KV cache | KV cache | lecture_10 | 正式系统术语保留英文，解释为键值缓存。 |
+| latency | 延迟 | latency | lecture_10 | 与 throughput 成对出现。 |
+| throughput | 吞吐量 | throughput | lecture_10 | tokens/second 语境。 |
+| collective operation | 集合通信操作 | collective | lecture_07 | Broadcast/all-reduce 等操作名保留英文。 |
+| data curation | 数据策划 | curation | lecture_13 | 数据选择、清洗和组织的总称。 |
+| Jaccard similarity | Jaccard 相似度 | Jaccard | lecture_14 | 公式和集合符号保持原样。 |
+| MinHash | 最小哈希 | MinHash | lecture_14 | 算法名保留英文。 |
+| vision encoder | 视觉编码器 | encoder | lecture_17 | CLIP/SigLIP 等正式名称保留英文。 |
+| diffusion model | 扩散模型 | diffusion | lecture_17 | 图像生成语境。 |
