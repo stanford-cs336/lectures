@@ -62,7 +62,7 @@ def main():
     text("Summary:")
     text("- Everything is operations on tensors (parameters, gradients, activations, optimizer states, data)")
     text("- einops: better way to think about tensor operations")
-    text("- 6 (# data points) (# parameters) FLOPs per training step")
+    text("- 6 (# batch size) (# sequnce length) (# parameters) FLOPs per training step")
     text("- Arithmetic intensity / roofline analysis: compute-bound or memory-bound?")
     text("- Matrix multiplications are compute-bound, elementwise operations are memory-bound")
     text("- Gradient accumulation, activation checkpointing: reduce memory to use bigger batch sizes")
