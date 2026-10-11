@@ -2,35 +2,71 @@
 
 This repository contains the lecture materials for Stanford's Language Modeling from Scratch (CS336).
 
+There are two kinds of lectures:
+
+- **Executable lectures**, named `lecture_XX.py`, are compiled into a trace that is viewed in a browser.
+- **Non-executable lectures**, named `lecture_XX.pdf`, are plain PDFs.
+
 ## Executable lectures
 
-These are named `lecture_XX.py`.
+### Prerequisites
+
+- [uv](https://docs.astral.sh/uv/)
+- [Node.js and npm](https://nodejs.org/) (for viewing and deploying)
+- [Modal](https://modal.com/) account (optional, only for lectures that need a GPU)
 
 ### Setup
 
-        uv sync
-        git clone https://github.com/percyliang/edtrace
+```
+uv sync
+git clone https://github.com/percyliang/edtrace
+```
 
-You can compile a lecture by running:
+`uv sync` installs the `edtrace` backend (which provides the `edtrace.execute` module).
+The cloned `edtrace` repo is needed for the frontend viewer (and is also used by `modal_execute.py`).
 
-        python execute.py -m lecture_01
+### Compile a lecture locally
 
-which generates a `var/traces/lecture_01.json` and caches any images as
-appropriate.
+```
+uv run python -m edtrace.execute -m lecture_01
+```
 
-To view it locally:
+This generates `var/traces/lecture_01.json` and caches any images as appropriate.
 
-Load a local server to view at `http://localhost:5173?trace=var/traces/sample.json`:
+Note: this runs on your machine, so lectures that need an NVIDIA GPU or CUDA tooling
+won't work on a laptop without one. Use Modal for those (see below).
 
-        npm run --prefix=edtrace/frontend dev
+### Compile a lecture on Modal
 
-Deploy to the main website:
+`modal_execute.py` runs the same `edtrace.execute` command inside a CUDA container on [Modal](https://modal.com/):
 
-        npm run --prefix=edtrace/frontend build
-        git add assets
-        git ci -am "<some message>"
-        git push
+```
+modal run modal_execute.py --module lecture_06
+```
 
-## Non-executable lectures
+You need to be logged in to Modal (`modal setup`).
+The outputs are copied back into `var/`:
 
-These are named `lecture_XX.pdf`.
+- `var/traces/<module>.json`
+- `var/*-ptx.txt`
+- `var/profiles.txt`
+
+### View locally
+
+Start a local server:
+
+```
+npm run --prefix=edtrace/frontend dev
+```
+
+Then open `http://localhost:5173?trace=var/traces/lecture_01.json`
+(replace `lecture_01` with the lecture you compiled).
+
+### Deploy to the main website
+
+```
+npm run --prefix=edtrace/frontend build
+git add assets
+git commit -am "<some message>"
+git push
+```
